@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model K Volatility Comparison Dashboards</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07131d;
+      --bg-2: #0b1823;
+      --panel: #10202d;
+      --panel-2: #142736;
+      --line: #22394b;
+      --line-soft: rgba(255,255,255,0.05);
+      --ink: #e8f1fa;
+      --muted: #96aabd;
+      --total: #6cb6ff;
+      --vol: #ff8f70;
+      --pill: #122736;
+    }
+    html {
+      background: var(--bg);
+    }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(108, 182, 255, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(255, 143, 112, 0.15), transparent 28%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 34px 24px 54px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      margin: 36px 0 12px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: var(--ink);
+    }
+    p, li {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    a {
+      color: #9aceff;
+    }
+    .hero {
+      padding: 24px 24px 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015)),
+        var(--panel);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 16px 40px rgba(0,0,0,0.18);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a9c7e2;
+    }
+    .lead {
+      max-width: 920px;
+      margin: 14px 0 0;
+      font-size: 15px;
+    }
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--pill);
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .swatch.total {
+      background: var(--total);
+    }
+    .swatch.vol {
+      background: var(--vol);
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+        var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      padding: 20px 20px 18px;
+    }
+    .note-card {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-2);
+    }
+    .note-card p {
+      margin: 0;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.01);
+    }
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      white-space: nowrap;
+      background: transparent;
+    }
+    .data-table th,
+    .data-table td {
+      padding: 10px 11px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    .data-table th {
+      background: var(--panel-2);
+      color: var(--ink);
+      font-weight: 650;
+      position: sticky;
+      top: 0;
+    }
+    .data-table td {
+      color: var(--ink);
+    }
+    .section-stack {
+      display: grid;
+      gap: 18px;
+    }
+    .chart-wrap {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+    .chart-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .links {
+      display: grid;
+      gap: 8px;
+      padding-left: 18px;
+    }
+    code {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2px 5px;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <p class="eyebrow">Model K Dashboard Index</p>
+    <h1>Total Market vs Volatility Segment Comparisons</h1>
+    <p class="lead">
+      This output keeps the same scoring pipeline from <code>Model_K.py</code> and
+      <code>Model_K_Volatility_Decomposition_RT.py</code>, but reorganizes the results into
+      comparison dashboards that line up each volatility slice against the total market baseline.
+    </p>
+    <div class="hero-pills">
+      <span class="pill"><span class="swatch total"></span>Total Market</span>
+      <span class="pill"><span class="swatch vol"></span>Volatility Segment</span>
+    </div>
+  </section>
+
+  <h2>Segment Dashboard Links</h2>
+  <section class="panel">
+    <ul class="links"><li><a href='Low Volatility/comparison_dashboard.html'>Low Volatility</a> (Hourly realized volatility at or below the trailing 72-hour rolling 25th percentile.)</li><li><a href='Standard Volatility/comparison_dashboard.html'>Standard Volatility</a> (Hourly realized volatility strictly between the trailing 72-hour rolling 25th and 75th percentiles.)</li><li><a href='High Volatility/comparison_dashboard.html'>High Volatility</a> (Hourly realized volatility at or above the trailing 72-hour rolling 75th percentile.)</li><li><a href='Low Volatility Extreme/comparison_dashboard.html'>Low Volatility Extreme</a> (Hourly realized volatility at or below the trailing 72-hour rolling 10th percentile.)</li><li><a href='High Volatility Extreme/comparison_dashboard.html'>High Volatility Extreme</a> (Hourly realized volatility at or above the trailing 72-hour rolling 90th percentile.)</li></ul>
+  </section>
+
+  <h2>Segment Summary</h2>
+  <section class="panel">
+    <div class="table-wrap"><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>segment_name</th>
+      <th>n_hourly_markets</th>
+      <th>hourly_market_share</th>
+      <th>scored_rows_volatility</th>
+      <th>scored_rows_total</th>
+      <th>brier_score_volatility</th>
+      <th>brier_score_total</th>
+      <th>log_loss_volatility</th>
+      <th>log_loss_total</th>
+      <th>ece_volatility</th>
+      <th>ece_total</th>
+      <th>audit_mismatches_volatility</th>
+      <th>audit_mismatches_total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Low Volatility</td>
+      <td>350</td>
+      <td>0.2760</td>
+      <td>62,466</td>
+      <td>226,149</td>
+      <td>0.1112</td>
+      <td>0.1269</td>
+      <td>0.3468</td>
+      <td>0.3886</td>
+      <td>0.0334</td>
+      <td>0.0107</td>
+      <td>50</td>
+      <td>129</td>
+    </tr>
+    <tr>
+      <td>Standard Volatility</td>
+      <td>588</td>
+      <td>0.4637</td>
+      <td>104,933</td>
+      <td>226,149</td>
+      <td>0.1279</td>
+      <td>0.1269</td>
+      <td>0.3927</td>
+      <td>0.3886</td>
+      <td>0.0150</td>
+      <td>0.0107</td>
+      <td>55</td>
+      <td>129</td>
+    </tr>
+    <tr>
+      <td>High Volatility</td>
+      <td>330</td>
+      <td>0.2603</td>
+      <td>58,750</td>
+      <td>226,149</td>
+      <td>0.1418</td>
+      <td>0.1269</td>
+      <td>0.4258</td>
+      <td>0.3886</td>
+      <td>0.0173</td>
+      <td>0.0107</td>
+      <td>24</td>
+      <td>129</td>
+    </tr>
+    <tr>
+      <td>Low Volatility Extreme</td>
+      <td>199</td>
+      <td>0.1569</td>
+      <td>35,495</td>
+      <td>226,149</td>
+      <td>0.1038</td>
+      <td>0.1269</td>
+      <td>0.3286</td>
+      <td>0.3886</td>
+      <td>0.0366</td>
+      <td>0.0107</td>
+      <td>30</td>
+      <td>129</td>
+    </tr>
+    <tr>
+      <td>High Volatility Extreme</td>
+      <td>154</td>
+      <td>0.1215</td>
+      <td>27,359</td>
+      <td>226,149</td>
+      <td>0.1539</td>
+      <td>0.1269</td>
+      <td>0.4546</td>
+      <td>0.3886</td>
+      <td>0.0449</td>
+      <td>0.0107</td>
+      <td>8</td>
+      <td>129</td>
+    </tr>
+  </tbody>
+</table></div>
+  </section>
+
+  <h2>Volatility Threshold Summary</h2>
+  <section class="panel">
+    <div class="table-wrap"><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>threshold_name</th>
+      <th>percentile</th>
+      <th>window_hours</th>
+      <th>latest_realized_volatility_cutoff</th>
+      <th>median_realized_volatility_cutoff</th>
+      <th>min_realized_volatility_cutoff</th>
+      <th>max_realized_volatility_cutoff</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Low Volatility Extreme</td>
+      <td>0.1000</td>
+      <td>72</td>
+      <td>0.0025</td>
+      <td>0.0026</td>
+      <td>0.0013</td>
+      <td>0.0048</td>
+    </tr>
+    <tr>
+      <td>Low Volatility</td>
+      <td>0.2500</td>
+      <td>72</td>
+      <td>0.0030</td>
+      <td>0.0030</td>
+      <td>0.0015</td>
+      <td>0.0055</td>
+    </tr>
+    <tr>
+      <td>High Volatility</td>
+      <td>0.7500</td>
+      <td>72</td>
+      <td>0.0049</td>
+      <td>0.0053</td>
+      <td>0.0027</td>
+      <td>0.0084</td>
+    </tr>
+    <tr>
+      <td>High Volatility Extreme</td>
+      <td>0.9000</td>
+      <td>72</td>
+      <td>0.0063</td>
+      <td>0.0069</td>
+      <td>0.0033</td>
+      <td>0.0111</td>
+    </tr>
+  </tbody>
+</table></div>
+  </section>
+
+  <h2>Shared Assumptions</h2>
+  <section class="panel">
+    <ul><li>Kalshi prices are YES probabilities. CSV values greater than 1 and no greater than 100 are treated as cents and divided by 100 before scoring.</li><li>Scored event outcome is the official Kalshi contract result: 1 for YES resolved, 0 for NO resolved.</li><li>Forecast rows are joined to outcomes by exact Kalshi market ticker when available; legacy price files without market tickers fall back to event_ticker + contract_label + strike.</li><li>Event tickers are interpreted as the contract settlement/end hour, matching the price fetcher&#x27;s hour_end_utc -&gt; New York event ticker convention.</li><li>Binance prices are diagnostic only. They may be used for strike matching upstream and audit mismatch checks, but never as the scored truth label.</li><li>Events present in the Kalshi price files but absent from the settlement CSV are excluded from scoring and counted in outcome_join_coverage.csv.</li><li>Volatility decomposition uses Binance BTCUSDT 1-minute candles aligned to each scored Kalshi forecast hour.</li><li>Hourly realized volatility is defined as sqrt(sum(log(close/open)^2)) across the 60 one-minute Binance bars inside the forecast hour.</li><li>Real-time classification uses the trailing 72-hour (4320-minute) Binance window available at each scored hour.</li><li>Rolling cutoff summaries in this run: q10 latest=0.00251833, median=0.00256496, range=[0.00129308, 0.00479875]; q25 latest=0.00302169, median=0.00304949, range=[0.00151308, 0.00547011]; q75 latest=0.00487723, median=0.00529946, range=[0.00265512, 0.00838105]; q90 latest=0.00632642, median=0.00692337, range=[0.00328579, 0.01111803].</li><li>Low Volatility includes hours with realized volatility &lt;= trailing q25; Standard Volatility includes trailing q25 &lt; realized volatility &lt; trailing q75; High Volatility includes realized volatility &gt;= trailing q75.</li></ul>
+  </section>
+
+  <h2>Run Notes</h2>
+  <section class="panel">
+    <ul><li>Loaded official Kalshi contract outcomes from kalshi_btc_atm_settlements.csv.</li><li>Reused hourly volatility segment table from /Users/socks/Repositories/Binary-Options-Market-Volatility-Research/Model_K_Volatility_Decomposition_RT/Model_K_Volatility_Decomposition_RT_outputs/hourly_market_volatility_segments.csv.</li><li>Dashboard inputs come from Data_Sourcing/Kalshi_Pricing_Fetch and Data_Sourcing/Settlement_Outcomes, matching the existing scripts.</li><li>This formatter keeps the same Model K scoring, calibration, Brier decomposition, and time-bucket logic. Only the presentation layer is new.</li></ul>
+  </section>
+</main>
+</body>
+</html>

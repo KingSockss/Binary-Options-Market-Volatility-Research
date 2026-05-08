@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model K Volatility Decomposition</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #657085;
+      --line: #d7dde8;
+      --soft: #f5f7fb;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: white;
+    }
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+    }
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 18px;
+    }
+    p, li {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 18px;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .data-table th, .data-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+    }
+    .data-table th {
+      background: var(--soft);
+      color: #334155;
+      font-weight: 650;
+    }
+    code {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Model K Volatility Decomposition</h1>
+  <p>
+    This directory contains five segment-specific copies of the usual Model K outputs, split by
+    hourly BTC realized volatility measured from Binance 1-minute candles aligned to each scored
+    Kalshi forecast hour.
+  </p>
+
+  <h2>Realized Volatility Definition</h2>
+  <p>
+    Hourly realized volatility is <code>sqrt(sum(log(close/open)^2))</code> over the 60 Binance
+    1-minute bars in the forecast hour. Segment thresholds are computed on unique scored hourly
+    Kalshi markets, not on individual minute-level forecast rows.
+  </p>
+
+  <h2>Thresholds</h2>
+  <div class="table-wrap"><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>threshold_name</th>
+      <th>percentile</th>
+      <th>realized_volatility_cutoff</th>
+      <th>rule</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Low Volatility Extreme</td>
+      <td>0.10</td>
+      <td>0.002267</td>
+      <td>realized_volatility &lt;= q10</td>
+    </tr>
+    <tr>
+      <td>Low Volatility</td>
+      <td>0.25</td>
+      <td>0.002992</td>
+      <td>realized_volatility &lt;= q25</td>
+    </tr>
+    <tr>
+      <td>High Volatility</td>
+      <td>0.75</td>
+      <td>0.005572</td>
+      <td>realized_volatility &gt;= q75</td>
+    </tr>
+    <tr>
+      <td>High Volatility Extreme</td>
+      <td>0.90</td>
+      <td>0.007446</td>
+      <td>realized_volatility &gt;= q90</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>Segment Output Folders</h2>
+  <ul>
+    <li><strong>Low Volatility</strong>: <a href='Low Volatility/model_k_summary.html'>summary</a>, <a href='Low Volatility/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='Low Volatility/time_bucket_summary.html'>time bucket summary</a></li><li><strong>Standard Volatility</strong>: <a href='Standard Volatility/model_k_summary.html'>summary</a>, <a href='Standard Volatility/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='Standard Volatility/time_bucket_summary.html'>time bucket summary</a></li><li><strong>High Volatility</strong>: <a href='High Volatility/model_k_summary.html'>summary</a>, <a href='High Volatility/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='High Volatility/time_bucket_summary.html'>time bucket summary</a></li><li><strong>Low Volatility Extreme</strong>: <a href='Low Volatility Extreme/model_k_summary.html'>summary</a>, <a href='Low Volatility Extreme/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='Low Volatility Extreme/time_bucket_summary.html'>time bucket summary</a></li><li><strong>High Volatility Extreme</strong>: <a href='High Volatility Extreme/model_k_summary.html'>summary</a>, <a href='High Volatility Extreme/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='High Volatility Extreme/time_bucket_summary.html'>time bucket summary</a></li>
+  </ul>
+  <div class="table-wrap"><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>segment_name</th>
+      <th>segment_rule</th>
+      <th>n_hourly_markets</th>
+      <th>n_forecasts</th>
+      <th>n_event_contracts</th>
+      <th>brier_score</th>
+      <th>log_loss</th>
+      <th>model_k_summary_html</th>
+      <th>model_k_summary_with_coverage_html</th>
+      <th>time_bucket_summary_html</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Low Volatility</td>
+      <td>Hourly realized volatility at or below the 25th percentile of scored hourly markets.</td>
+      <td>317</td>
+      <td>56594</td>
+      <td>951</td>
+      <td>0.112919</td>
+      <td>0.352247</td>
+      <td>Low Volatility/model_k_summary.html</td>
+      <td>Low Volatility/model_k_summary_with_coverage.html</td>
+      <td>Low Volatility/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>Standard Volatility</td>
+      <td>Hourly realized volatility strictly between the 25th and 75th percentiles of scored hourly markets.</td>
+      <td>634</td>
+      <td>113309</td>
+      <td>1902</td>
+      <td>0.124531</td>
+      <td>0.383363</td>
+      <td>Standard Volatility/model_k_summary.html</td>
+      <td>Standard Volatility/model_k_summary_with_coverage.html</td>
+      <td>Standard Volatility/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>High Volatility</td>
+      <td>Hourly realized volatility at or above the 75th percentile of scored hourly markets.</td>
+      <td>317</td>
+      <td>56246</td>
+      <td>951</td>
+      <td>0.145654</td>
+      <td>0.435916</td>
+      <td>High Volatility/model_k_summary.html</td>
+      <td>High Volatility/model_k_summary_with_coverage.html</td>
+      <td>High Volatility/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>Low Volatility Extreme</td>
+      <td>Hourly realized volatility at or below the 10th percentile of scored hourly markets.</td>
+      <td>127</td>
+      <td>22606</td>
+      <td>381</td>
+      <td>0.105450</td>
+      <td>0.332720</td>
+      <td>Low Volatility Extreme/model_k_summary.html</td>
+      <td>Low Volatility Extreme/model_k_summary_with_coverage.html</td>
+      <td>Low Volatility Extreme/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>High Volatility Extreme</td>
+      <td>Hourly realized volatility at or above the 90th percentile of scored hourly markets.</td>
+      <td>127</td>
+      <td>22507</td>
+      <td>381</td>
+      <td>0.145956</td>
+      <td>0.430355</td>
+      <td>High Volatility Extreme/model_k_summary.html</td>
+      <td>High Volatility Extreme/model_k_summary_with_coverage.html</td>
+      <td>High Volatility Extreme/time_bucket_summary.html</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>Shared Root Files</h2>
+  <ul>
+    <li><code>binance_1m_klines.csv</code>: cached Binance minute data used for the decomposition.</li>
+    <li><code>binance_hourly_realized_volatility.csv</code>: realized volatility per Binance hour.</li>
+    <li><code>hourly_market_volatility_segments.csv</code>: each scored Kalshi hour with its realized volatility and segment flags.</li>
+    <li><code>segment_thresholds.csv</code>: the quantile cutoffs used in this run.</li>
+    <li><code>all_scored_rows_with_volatility.csv</code>: scored Model K rows with attached hourly volatility metadata.</li>
+    <li><code>kalshi_official_outcomes_long.csv</code>: official contract outcomes used for all segment runs.</li>
+  </ul>
+</main>
+</body>
+</html>

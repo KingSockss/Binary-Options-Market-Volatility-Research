@@ -1,0 +1,13 @@
+# VenV
+
+Venv/
+
+
+#CSVs
+
+*.csv
+
+
+# macOS system files
+.DS_Store
+**/.DS_Store

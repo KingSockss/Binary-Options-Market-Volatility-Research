@@ -1,0 +1,11 @@
+Kalshi prices are YES probabilities. CSV values greater than 1 and no greater than 100 are treated as cents and divided by 100 before scoring.
+Scored event outcome is the official Kalshi contract result: 1 for YES resolved, 0 for NO resolved.
+Forecast rows are joined to outcomes by exact Kalshi market ticker when available; legacy price files without market tickers fall back to event_ticker + contract_label + strike.
+Event tickers are interpreted as the contract settlement/end hour, matching the price fetcher's hour_end_utc -> New York event ticker convention.
+Binance prices are diagnostic only. They may be used for strike matching upstream and audit mismatch checks, but never as the scored truth label.
+Events present in the Kalshi price files but absent from the settlement CSV are excluded from scoring and counted in outcome_join_coverage.csv.
+Volatility decomposition uses Binance BTCUSDT 1-minute candles aligned to each scored Kalshi forecast hour.
+Hourly realized volatility is defined as sqrt(sum(log(close/open)^2)) across the 60 one-minute Binance bars inside the forecast hour.
+Low/standard/high cutoffs in this run are q25=0.00299152 and q75=0.00557237; extreme cutoffs are q10=0.00226683 and q90=0.00744560.
+Low Volatility includes hours with realized volatility <= q25; Standard Volatility includes q25 < realized volatility < q75; High Volatility includes realized volatility >= q75.
+High Volatility is interpreted as the top quartile rather than the literal 'highest 75%' because the latter conflicts with the requested Standard Volatility range.

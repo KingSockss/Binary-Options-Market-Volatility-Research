@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model K Real-Time Volatility Decomposition</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071018;
+      --panel: #0d1722;
+      --panel-2: #122130;
+      --ink: #e6eef8;
+      --muted: #9db0c3;
+      --line: #223548;
+      --soft: #102030;
+      --blue: #6cb6ff;
+      --teal: #4fd1c5;
+      --amber: #f6ad55;
+      --link: #8cc8ff;
+    }
+    html {
+      background: var(--bg);
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top, rgba(76, 132, 196, 0.18), transparent 32%),
+        linear-gradient(180deg, #08111a 0%, #071018 100%);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 18px;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+    p, li {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    a {
+      color: var(--link);
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .metric-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .metric-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 24px;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    .chart {
+      width: 100%;
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 650;
+      fill: var(--ink);
+    }
+    .axis {
+      stroke: #35516c;
+      stroke-width: 1;
+    }
+    .diag {
+      fill: none;
+      stroke: #6682a0;
+      stroke-width: 1.5;
+      stroke-dasharray: 5 5;
+    }
+    .series {
+      fill: none;
+      stroke: var(--blue);
+      stroke-width: 3;
+    }
+    circle {
+      fill: var(--blue);
+    }
+    rect {
+      fill: var(--teal);
+    }
+    .axis-label, .tick {
+      fill: var(--muted);
+      font-size: 12px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      white-space: nowrap;
+      background: transparent;
+    }
+    .data-table th, .data-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+    }
+    .data-table td {
+      color: var(--ink);
+    }
+    .data-table th {
+      background: var(--panel-2);
+      color: var(--ink);
+      font-weight: 650;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    code {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 2px 5px;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Model K Real-Time Volatility Decomposition</h1>
+  <p>
+    This directory contains five segment-specific copies of the usual Model K outputs, split by
+    hourly BTC realized volatility measured from Binance 1-minute candles and classified with a
+    trailing 72-hour real-time window.
+  </p>
+
+  <h2>Real-Time Volatility Definition</h2>
+  <p>
+    Hourly realized volatility is <code>sqrt(sum(log(close/open)^2))</code> over the 60 Binance
+    1-minute bars in the forecast hour. Each scored hour is then compared against the trailing
+    <code>72</code> Binance hours (<code>4320</code> minutes)
+    available at that time, so the segment cutoffs move through time instead of using one
+    full-sample threshold for the entire run.
+  </p>
+
+  <h2>Threshold Summaries</h2>
+  <div class="table-wrap"><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>threshold_name</th>
+      <th>percentile</th>
+      <th>window_hours</th>
+      <th>window_minutes</th>
+      <th>latest_realized_volatility_cutoff</th>
+      <th>min_realized_volatility_cutoff</th>
+      <th>median_realized_volatility_cutoff</th>
+      <th>max_realized_volatility_cutoff</th>
+      <th>rule</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Low Volatility Extreme</td>
+      <td>0.10</td>
+      <td>72</td>
+      <td>4320</td>
+      <td>0.002518</td>
+      <td>0.001293</td>
+      <td>0.002565</td>
+      <td>0.004799</td>
+      <td>realized_volatility &lt;= trailing_72h_q10</td>
+    </tr>
+    <tr>
+      <td>Low Volatility</td>
+      <td>0.25</td>
+      <td>72</td>
+      <td>4320</td>
+      <td>0.003022</td>
+      <td>0.001513</td>
+      <td>0.003049</td>
+      <td>0.005470</td>
+      <td>realized_volatility &lt;= trailing_72h_q25</td>
+    </tr>
+    <tr>
+      <td>High Volatility</td>
+      <td>0.75</td>
+      <td>72</td>
+      <td>4320</td>
+      <td>0.004877</td>
+      <td>0.002655</td>
+      <td>0.005299</td>
+      <td>0.008381</td>
+      <td>realized_volatility &gt;= trailing_72h_q75</td>
+    </tr>
+    <tr>
+      <td>High Volatility Extreme</td>
+      <td>0.90</td>
+      <td>72</td>
+      <td>4320</td>
+      <td>0.006326</td>
+      <td>0.003286</td>
+      <td>0.006923</td>
+      <td>0.011118</td>
+      <td>realized_volatility &gt;= trailing_72h_q90</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>Segment Output Folders</h2>
+  <ul>
+    <li><strong>Low Volatility</strong>: <a href='Low Volatility/model_k_summary.html'>summary</a>, <a href='Low Volatility/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='Low Volatility/time_bucket_summary.html'>time bucket summary</a></li><li><strong>Standard Volatility</strong>: <a href='Standard Volatility/model_k_summary.html'>summary</a>, <a href='Standard Volatility/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='Standard Volatility/time_bucket_summary.html'>time bucket summary</a></li><li><strong>High Volatility</strong>: <a href='High Volatility/model_k_summary.html'>summary</a>, <a href='High Volatility/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='High Volatility/time_bucket_summary.html'>time bucket summary</a></li><li><strong>Low Volatility Extreme</strong>: <a href='Low Volatility Extreme/model_k_summary.html'>summary</a>, <a href='Low Volatility Extreme/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='Low Volatility Extreme/time_bucket_summary.html'>time bucket summary</a></li><li><strong>High Volatility Extreme</strong>: <a href='High Volatility Extreme/model_k_summary.html'>summary</a>, <a href='High Volatility Extreme/model_k_summary_with_coverage.html'>summary with coverage</a>, <a href='High Volatility Extreme/time_bucket_summary.html'>time bucket summary</a></li>
+  </ul>
+  <div class="table-wrap"><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: left;">
+      <th>segment_name</th>
+      <th>segment_rule</th>
+      <th>n_hourly_markets</th>
+      <th>n_forecasts</th>
+      <th>n_event_contracts</th>
+      <th>brier_score</th>
+      <th>log_loss</th>
+      <th>model_k_summary_html</th>
+      <th>model_k_summary_with_coverage_html</th>
+      <th>time_bucket_summary_html</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Low Volatility</td>
+      <td>Hourly realized volatility at or below the trailing 72-hour rolling 25th percentile.</td>
+      <td>350</td>
+      <td>62466</td>
+      <td>1050</td>
+      <td>0.111176</td>
+      <td>0.346827</td>
+      <td>Low Volatility/model_k_summary.html</td>
+      <td>Low Volatility/model_k_summary_with_coverage.html</td>
+      <td>Low Volatility/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>Standard Volatility</td>
+      <td>Hourly realized volatility strictly between the trailing 72-hour rolling 25th and 75th percentiles.</td>
+      <td>588</td>
+      <td>104933</td>
+      <td>1764</td>
+      <td>0.127861</td>
+      <td>0.392733</td>
+      <td>Standard Volatility/model_k_summary.html</td>
+      <td>Standard Volatility/model_k_summary_with_coverage.html</td>
+      <td>Standard Volatility/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>High Volatility</td>
+      <td>Hourly realized volatility at or above the trailing 72-hour rolling 75th percentile.</td>
+      <td>330</td>
+      <td>58750</td>
+      <td>990</td>
+      <td>0.141820</td>
+      <td>0.425812</td>
+      <td>High Volatility/model_k_summary.html</td>
+      <td>High Volatility/model_k_summary_with_coverage.html</td>
+      <td>High Volatility/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>Low Volatility Extreme</td>
+      <td>Hourly realized volatility at or below the trailing 72-hour rolling 10th percentile.</td>
+      <td>199</td>
+      <td>35495</td>
+      <td>597</td>
+      <td>0.103785</td>
+      <td>0.328590</td>
+      <td>Low Volatility Extreme/model_k_summary.html</td>
+      <td>Low Volatility Extreme/model_k_summary_with_coverage.html</td>
+      <td>Low Volatility Extreme/time_bucket_summary.html</td>
+    </tr>
+    <tr>
+      <td>High Volatility Extreme</td>
+      <td>Hourly realized volatility at or above the trailing 72-hour rolling 90th percentile.</td>
+      <td>154</td>
+      <td>27359</td>
+      <td>462</td>
+      <td>0.153896</td>
+      <td>0.454594</td>
+      <td>High Volatility Extreme/model_k_summary.html</td>
+      <td>High Volatility Extreme/model_k_summary_with_coverage.html</td>
+      <td>High Volatility Extreme/time_bucket_summary.html</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>Shared Root Files</h2>
+  <ul>
+    <li><code>binance_1m_klines.csv</code>: cached Binance minute data used for the decomposition.</li>
+    <li><code>binance_hourly_realized_volatility.csv</code>: realized volatility per Binance hour plus rolling real-time thresholds.</li>
+    <li><code>hourly_market_volatility_segments.csv</code>: each scored Kalshi hour with its realized volatility, rolling thresholds, and segment flags.</li>
+    <li><code>segment_thresholds.csv</code>: summary statistics for the rolling percentile cutoffs used in this run.</li>
+    <li><code>all_scored_rows_with_volatility.csv</code>: scored Model K rows with attached hourly volatility metadata.</li>
+    <li><code>kalshi_official_outcomes_long.csv</code>: official contract outcomes used for all segment runs.</li>
+  </ul>
+</main>
+</body>
+</html>

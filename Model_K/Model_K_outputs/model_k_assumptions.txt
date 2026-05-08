@@ -1,0 +1,6 @@
+Kalshi prices are YES probabilities. CSV values greater than 1 and no greater than 100 are treated as cents and divided by 100 before scoring.
+Scored event outcome is the official Kalshi contract result: 1 for YES resolved, 0 for NO resolved.
+Forecast rows are joined to outcomes by exact Kalshi market ticker when available; legacy price files without market tickers fall back to event_ticker + contract_label + strike.
+Event tickers are interpreted as the contract settlement/end hour, matching the price fetcher's hour_end_utc -> New York event ticker convention.
+Binance prices are diagnostic only. They may be used for strike matching upstream and audit mismatch checks, but never as the scored truth label.
+Events present in the Kalshi price files but absent from the settlement CSV are excluded from scoring and counted in outcome_join_coverage.csv.
